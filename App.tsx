@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
 import ResultModal from './components/ResultModal';
+import CountdownOverlay from './components/CountdownOverlay';
 import { GameState, ScoreResult } from './types';
 import { MAX_TIME, SCORING_RULES } from './constants';
 
@@ -18,9 +19,14 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Start game logic
+  // Start logic: User clicks start -> Go to Countdown
   const handleStartGame = useCallback(() => {
     setSeconds(0);
+    setGameState(GameState.COUNTDOWN);
+  }, []);
+
+  // Countdown Complete logic: Countdown finishes -> Go to Playing and Start Timer
+  const handleCountdownComplete = useCallback(() => {
     setGameState(GameState.PLAYING);
     
     // Start Timer
@@ -29,10 +35,6 @@ const App: React.FC = () => {
         const next = prev + 1;
         // Auto finish if max time reached
         if (next >= MAX_TIME) {
-          // We need to stop timer and show result, but we cannot call handleFinishGame directly here easily
-          // because it relies on the state. 
-          // Instead, we'll let the effect below handle the transition or just call a ref-stable function.
-          // For simplicity in this loop, we just increment. The useEffect will catch the max time.
           return next;
         }
         return next;
@@ -56,9 +58,10 @@ const App: React.FC = () => {
 
   // Restart game logic
   const handleRestart = useCallback(() => {
+    stopTimer();
     setGameState(GameState.START);
     setSeconds(0);
-  }, []);
+  }, [stopTimer]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -70,25 +73,20 @@ const App: React.FC = () => {
     let score = 1;
     let message = '';
     let subMessage = '';
-
-    // Determine Score and Message based on rules
-    // Rule 1: > 31s (which implies >= 31 in integer terms if max is 35, basically > 30)
-    // The prompt says "超过 31秒" (Exceed 31s) -> 32, 33, 34, 35. 
-    // However, the rule text "可站立超過31秒 | 得3分" usually implies hitting that tier.
-    // Let's look at the mapping logic in prompt: 
-    // "可站立超過 31秒" -> 3分. 
-    // "21～30 秒" -> 2分.
-    // "0～20 秒" -> 1分.
-    // There is a slight gap for '31'. Let's assume >= 31 is 3 points.
     
-    if (sec >= 31) {
+    // Logic: 
+    // > 30 (31+) -> 3 pts
+    // 16-30 -> 2 pts
+    // 0-15 -> 1 pt
+    
+    if (sec > 30) {
       score = 3;
       message = SCORING_RULES[0].description; 
-      subMessage = "你的身心都站得很安穩！";
-    } else if (sec >= 21) {
+      subMessage = "站得很好，保持這份穩定！";
+    } else if (sec > 15) {
       score = 2;
       message = SCORING_RULES[1].description;
-      subMessage = "有不錯的平衡感，會越來越穩！";
+      subMessage = "慢慢來，穩定會越來越進步。";
     } else {
       score = 1;
       message = SCORING_RULES[2].description;
@@ -104,16 +102,25 @@ const App: React.FC = () => {
         <StartScreen onStart={handleStartGame} />
       )}
 
-      {gameState === GameState.PLAYING && (
-        <GameScreen seconds={seconds} onFinish={handleFinishGame} />
+      {(gameState === GameState.PLAYING || gameState === GameState.COUNTDOWN) && (
+        <GameScreen 
+          seconds={seconds} 
+          onFinish={handleFinishGame} 
+          onRestart={handleRestart}
+        />
+      )}
+      
+      {gameState === GameState.COUNTDOWN && (
+        <CountdownOverlay onComplete={handleCountdownComplete} />
       )}
 
       {gameState === GameState.RESULT && (
         <>
-           {/* We keep GameScreen in background for visual continuity or just an overlay? 
-               Usually modals overlay the previous screen. Let's overlay GameScreen.
-           */}
-           <GameScreen seconds={seconds} onFinish={() => {}} />
+           <GameScreen 
+             seconds={seconds} 
+             onFinish={() => {}} 
+             onRestart={handleRestart}
+           />
            <ResultModal 
              seconds={seconds} 
              result={getResult(seconds)} 

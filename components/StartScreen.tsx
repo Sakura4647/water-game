@@ -10,8 +10,8 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart }) => {
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="max-w-md w-full bg-white/95 backdrop-blur-sm p-8 rounded-2xl shadow-xl border-2 border-wood-300 text-center animate-fade-in">
         
-        {/* Icon */}
-        <div className="mb-6 animate-bounce">
+        {/* Icon - Static, no animation */}
+        <div className="mb-6">
           <span className="text-6xl drop-shadow-md">💧</span>
         </div>
 

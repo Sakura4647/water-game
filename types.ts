@@ -1,5 +1,6 @@
 export enum GameState {
   START = 'START',
+  COUNTDOWN = 'COUNTDOWN',
   PLAYING = 'PLAYING',
   RESULT = 'RESULT',
 }
