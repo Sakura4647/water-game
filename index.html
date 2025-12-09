@@ -58,13 +58,15 @@
       }
       .fade-in { animation: fadeIn 0.3s ease-out; }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      .animate-ping-slow { animation: pingSlow 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+      @keyframes pingSlow { 75%, 100% { transform: scale(1.5); opacity: 0; } }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
   }
 }
 </script>
@@ -85,31 +87,31 @@
                     水之定立｜金雞獨立
                 </h1>
 
-                <div class="bg-wood-50 p-6 rounded-xl border border-wood-200 text-left mb-8 shadow-inner">
-                    <p class="text-wood-700 mb-3 font-bold text-lg tracking-wide leading-relaxed">
+                <!-- Description & Rules Card -->
+                <div class="bg-wood-50 p-6 rounded-xl border border-wood-200 text-left mb-8">
+                    <p class="text-wood-700 mb-4 font-bold tracking-wider text-lg">
                         腎為先天之本，腎氣充盈則穩如靜水。
                     </p>
-                    <p class="text-base text-wood-600 leading-relaxed font-medium">
+                    <p class="text-base text-wood-600 mb-6 leading-relaxed font-medium tracking-wide">
                         水行對應臟腑為腎與膀胱，與骨骼、平衡與穩定有關。
                     </p>
-                </div>
 
-                <div class="mb-8 text-left">
-                    <h2 class="text-xl font-bold text-wood-800 mb-4 border-b-2 border-wood-200 pb-2 flex items-center gap-2 tracking-wider">
+                    <h2 class="text-xl font-bold text-wood-800 mb-3 border-b border-wood-300 pb-2 flex items-center gap-2 tracking-wider">
                         <span>📜</span> 遊戲規則
                     </h2>
-                    <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <span class="flex-shrink-0 font-bold text-water-main text-xl">①</span>
-                            <span class="text-wood-800 font-medium text-base md:text-lg leading-snug">雙手合十（拿著手機）於胸前，單腳站立</span>
+                    
+                    <ul class="space-y-3 text-wood-800 leading-relaxed text-base font-medium tracking-wide">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-water-main text-lg">①</span>
+                            <span>雙手合十（拿著手機）於胸前，單腳站立</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="flex-shrink-0 font-bold text-water-main text-xl">②</span>
-                            <span class="text-wood-800 font-medium text-base md:text-lg leading-snug">按下遊戲開始後，並閉上眼睛，保持身體穩定</span>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-water-main text-lg">②</span>
+                            <span>按下遊戲開始後，並閉上眼睛，保持身體穩定</span>
                         </li>
-                        <li class="flex items-start gap-3">
-                            <span class="flex-shrink-0 font-bold text-water-main text-xl">③</span>
-                            <span class="text-wood-800 font-medium text-base md:text-lg leading-snug">當支撐腳移動或失去平衡時，結束計時</span>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold text-water-main text-lg">③</span>
+                            <span>當支撐腳移動或失去平衡時，結束計時</span>
                         </li>
                     </ul>
                 </div>
@@ -132,11 +134,14 @@
 
                 <!-- Right: Buttons -->
                 <div class="flex gap-2">
-                    <button onclick="ui.showRules()" class="border-2 border-wood-600 text-wood-600 font-bold rounded-lg px-4 py-1 hover:bg-wood-100 transition-colors text-base">
+                    <button onclick="ui.showRules()" class="border-2 border-wood-600 text-wood-600 font-bold rounded-lg px-3 py-1 hover:bg-wood-100 transition-colors text-base tracking-wide">
                         規則
                     </button>
-                    <button onclick="game.restart()" class="bg-wood-600 text-white font-bold rounded-lg px-4 py-1 hover:bg-wood-700 transition-colors text-base">
+                    <button onclick="game.restart()" class="bg-wood-600 text-white font-bold rounded-lg px-3 py-1 hover:bg-wood-700 transition-colors text-base tracking-wide">
                         重來
+                    </button>
+                    <button id="btn-result" onclick="game.showCurrentResult()" disabled class="bg-wood-600 text-white font-bold rounded-lg px-3 py-1 hover:bg-wood-700 transition-colors text-base tracking-wide opacity-50 cursor-not-allowed">
+                        結果
                     </button>
                 </div>
             </div>
@@ -174,15 +179,16 @@
         </div>
 
         <!-- 3. Countdown Overlay -->
-        <div id="overlay-countdown" class="hidden-force fixed inset-0 z-50 flex items-center justify-center bg-wood-900/40 backdrop-blur-sm">
-            <div id="countdown-display" class="text-9xl font-black text-white drop-shadow-lg animate-ping">3</div>
+        <div id="overlay-countdown" class="hidden-force fixed inset-0 z-50 flex flex-col items-center justify-center bg-wood-900/40 backdrop-blur-sm">
+            <p class="text-wood-50 text-xl md:text-2xl font-bold tracking-wider mb-4 animate-pulse">預備開始</p>
+            <div id="countdown-display" class="text-8xl md:text-9xl font-black text-white drop-shadow-2xl animate-ping">3</div>
         </div>
 
         <!-- 4. Result Modal -->
         <div id="modal-result" class="hidden-force fixed inset-0 z-50 flex items-center justify-center p-4 bg-wood-900/60 backdrop-blur-sm fade-in">
             <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden p-6 text-center relative">
                 <!-- Close Button -->
-                <button onclick="game.restart()" class="absolute top-4 right-4 text-wood-400 hover:text-wood-700 transition-colors p-2 rounded-full hover:bg-wood-100">
+                <button onclick="ui.closeResult()" class="absolute top-4 right-4 text-wood-400 hover:text-wood-700 transition-colors p-2 rounded-full hover:bg-wood-100">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -301,7 +307,8 @@
                 resSeconds: document.getElementById('res-seconds'),
                 resMessage: document.getElementById('res-message'),
                 resSubmessage: document.getElementById('res-submessage'),
-                resScore: document.getElementById('res-score')
+                resScore: document.getElementById('res-score'),
+                btnResult: document.getElementById('btn-result')
             },
             
             showStart() {
@@ -310,6 +317,7 @@
                 this.els.overlayCountdown.classList.add('hidden-force');
                 this.els.modalResult.classList.add('hidden-force');
                 this.els.modalRules.classList.add('hidden-force');
+                this.enableResultBtn(false);
             },
 
             showGame() {
@@ -325,7 +333,10 @@
             },
 
             showCountdown(cb) {
+                // Ensure Game Screen is visible for background
                 this.els.screenStart.classList.add('hidden-force');
+                this.els.screenGame.classList.remove('hidden-force');
+                
                 this.els.overlayCountdown.classList.remove('hidden-force');
                 
                 let count = 3;
@@ -349,6 +360,21 @@
                 this.els.resSubmessage.textContent = result.subMessage;
                 this.els.resScore.textContent = result.score;
                 this.els.modalResult.classList.remove('hidden-force');
+                this.enableResultBtn(true);
+            },
+            
+            closeResult() {
+                this.els.modalResult.classList.add('hidden-force');
+            },
+
+            enableResultBtn(enabled) {
+                if (enabled) {
+                    this.els.btnResult.disabled = false;
+                    this.els.btnResult.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    this.els.btnResult.disabled = true;
+                    this.els.btnResult.classList.add('opacity-50', 'cursor-not-allowed');
+                }
             },
             
             showRules() { this.els.modalRules.classList.remove('hidden-force'); },
@@ -357,16 +383,16 @@
 
         const game = {
             startCountdown() {
+                ui.showGame(); // Ensure background is ready
                 ui.showCountdown(() => {
-                    this.startGame();
+                    this.startPlaying();
                 });
             },
 
-            startGame() {
+            startPlaying() {
                 STATE.seconds = 0;
                 ui.updateTimer(0);
-                ui.showGame();
-
+                
                 if (STATE.timerId) clearInterval(STATE.timerId);
                 STATE.timerId = setInterval(() => {
                     STATE.seconds++;
@@ -386,6 +412,11 @@
             restart() {
                 if (STATE.timerId) clearInterval(STATE.timerId);
                 ui.showStart();
+            },
+            
+            showCurrentResult() {
+                const result = this.calculateResult(STATE.seconds);
+                ui.showResult(result, STATE.seconds);
             },
 
             calculateResult(sec) {
