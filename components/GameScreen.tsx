@@ -67,7 +67,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ seconds, onFinish, onRestart })
           onClick={onFinish}
           className="w-full max-w-md bg-water-main hover:bg-sky-300 active:bg-water-dark transition-all duration-150 text-white font-bold text-2xl py-5 rounded-2xl shadow-lg border-b-4 border-water-dark active:border-b-0 active:translate-y-1 tracking-widest"
         >
-          遊戲結束
+          我無法平衡了
         </button>
       </div>
 
@@ -93,7 +93,7 @@ const GameScreen: React.FC<GameScreenProps> = ({ seconds, onFinish, onRestart })
                  <div className="text-center mt-2 mb-6 px-2">
                     <p className="text-wood-700 font-bold text-xl tracking-wider mb-2">腎為先天之本</p>
                     <p className="text-wood-600 text-base font-medium leading-relaxed">
-                        水行對應臟腑為腎與膀胱，與骨骼、平衡與穩定有關。
+                        水行對應臟腑為腎與膀胱，與骨骼生長的強健和穩定有關。
                     </p>
                  </div>
 
